@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Work · Cala AI 50</title>
+    <style>
+      :root { color-scheme: dark; }
+      html, body { margin: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: Menlo, Consolas, Monaco, "Courier New", monospace; }
+      .stage { width: 100%; height: 100%; }
+      canvas { width: 100vw; height: 100vh; display: block; image-rendering: pixelated; image-rendering: crisp-edges; background: #000; }
+      .breadcrumb { position: fixed; top: 18px; left: 18px; color: #d4d4d4; font-size: 13px; letter-spacing: 0.01em; background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 8px; padding: 8px 12px; backdrop-filter: blur(6px); z-index: 20; user-select: none; }
+      .breadcrumb-list { display: flex; align-items: center; gap: 8px; margin: 0; padding: 0; list-style: none; }
+      .breadcrumb-item { display: inline-flex; align-items: center; }
+      .breadcrumb-link { color: #d4d4d4; text-decoration: none; }
+      .breadcrumb-link:hover { color: #fff; }
+      .breadcrumb-page { color: #f3f3f3; font-weight: 600; }
+      .breadcrumb-separator { color: #858585; }
+      .breadcrumb-dropdown { position: relative; }
+      .breadcrumb-trigger { border: 0; color: #d4d4d4; background: transparent; cursor: pointer; font: inherit; padding: 0; display: inline-flex; align-items: center; gap: 5px; }
+      .breadcrumb-trigger:hover { color: #fff; }
+      .breadcrumb-caret { color: #8f8f8f; font-size: 11px; }
+      .breadcrumb-menu { position: absolute; top: calc(100% + 10px); left: 0; min-width: 240px; padding: 8px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(8, 8, 8, 0.97); box-shadow: 0 14px 45px rgba(0, 0, 0, 0.55); backdrop-filter: blur(8px); display: none; }
+      .breadcrumb-menu.open { display: block; }
+      .breadcrumb-menu-label { color: #8f8f8f; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 7px 8px 4px; }
+      .breadcrumb-menu-sep { height: 1px; margin: 8px 4px; background: rgba(255, 255, 255, 0.13); }
+      .breadcrumb-menu-item { display: flex; align-items: center; justify-content: space-between; color: #ececec; text-decoration: none; border-radius: 8px; padding: 9px 10px; font-size: 13px; }
+      .breadcrumb-menu-item:hover { background: rgba(255, 255, 255, 0.1); }
+      .breadcrumb-menu-item.active { background: rgba(255, 255, 255, 0.14); }
+      .breadcrumb-menu-meta { color: #9b9b9b; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="stage"><canvas id="ascii"></canvas></div>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item"><a class="breadcrumb-link" href="./index.html">I</a></li>
+        <li class="breadcrumb-separator" role="presentation">&gt;</li>
+        <li class="breadcrumb-item breadcrumb-dropdown">
+          <button class="breadcrumb-trigger" id="am-trigger" aria-haspopup="menu" aria-expanded="false">work <span class="breadcrumb-caret">▾</span></button>
+          <div class="breadcrumb-menu" id="am-menu" role="menu" aria-label="work menu">
+            <div class="breadcrumb-menu-label">work</div>
+            <a class="breadcrumb-menu-item" href="./index.html" role="menuitem"><span>Francisco Terpolilli</span><span class="breadcrumb-menu-meta">default</span></a>
+            <div class="breadcrumb-menu-sep"></div>
+            <div class="breadcrumb-menu-label">work</div>
+            <a class="breadcrumb-menu-item" href="./work-white-circle.html" role="menuitem">White Circle</a>
+            <a class="breadcrumb-menu-item" href="./work-cursor-ambassador.html" role="menuitem">Cursor Ambassador</a>
+            <a class="breadcrumb-menu-item active" href="./work-cala-ai-50.html" role="menuitem">Cala AI 50</a>
+            <a class="breadcrumb-menu-item" href="./work-specter.html" role="menuitem">Specter</a>
+            <a class="breadcrumb-menu-item" href="./work-bullfinch.html" role="menuitem">bullfinch</a>
+          </div>
+        </li>
+        <li class="breadcrumb-separator" role="presentation">&gt;</li>
+        <li class="breadcrumb-item breadcrumb-page" aria-current="page">Cala AI 50</li>
+      </ol>
+    </nav>
+    <script type="module" src="./web_ascii_work.js?mesh=cala_mesh.csv&v=37"></script>
+    <script type="module" src="./breadcrumb_dropdown.js?v=1"></script>
+  </body>
+</html>

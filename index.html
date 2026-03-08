@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pinched Fingers ASCII Spin</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        overflow: hidden;
+        font-family: Menlo, Consolas, Monaco, "Courier New", monospace;
+      }
+      .stage {
+        width: 100%;
+        height: 100%;
+      }
+      canvas {
+        width: 100vw;
+        height: 100vh;
+        display: block;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        background: #000;
+      }
+      .breadcrumb {
+        position: fixed;
+        top: 18px;
+        left: 18px;
+        color: #d4d4d4;
+        font-size: 13px;
+        letter-spacing: 0.01em;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        padding: 8px 12px;
+        backdrop-filter: blur(6px);
+        z-index: 20;
+        user-select: none;
+      }
+      .breadcrumb-list {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .breadcrumb-item {
+        display: inline-flex;
+        align-items: center;
+      }
+      .breadcrumb-link {
+        color: #d4d4d4;
+        text-decoration: none;
+      }
+      .breadcrumb-page {
+        color: #f3f3f3;
+        font-weight: 600;
+      }
+      .breadcrumb-separator {
+        color: #858585;
+      }
+      .command-kbd {
+        position: fixed;
+        top: 18px;
+        right: 18px;
+        color: #cfcfcf;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-bottom-width: 2px;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(6px);
+        z-index: 20;
+        user-select: none;
+      }
+      .command-kbd b {
+        color: #fff;
+      }
+
+      .cmdk-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.62);
+        display: none;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 11vh;
+        z-index: 40;
+      }
+      .cmdk-backdrop.open {
+        display: flex;
+      }
+      .cmdk {
+        width: min(680px, calc(100vw - 32px));
+        background: rgba(14, 14, 14, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+      }
+      .cmdk-search {
+        width: 100%;
+        box-sizing: border-box;
+        border: none;
+        outline: none;
+        padding: 14px 16px;
+        color: #f2f2f2;
+        font-size: 14px;
+        background: transparent;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .cmdk-list {
+        max-height: min(55vh, 430px);
+        overflow: auto;
+        padding: 8px;
+      }
+      .cmdk-group {
+        margin: 6px 0 10px;
+      }
+      .cmdk-group-label {
+        color: #8f8f8f;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 4px 8px;
+      }
+      .cmdk-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        width: 100%;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 10px;
+        color: #ececec;
+        background: transparent;
+        text-align: left;
+        cursor: pointer;
+      }
+      .cmdk-item:hover,
+      .cmdk-item.active {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .cmdk-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+      .cmdk-icon {
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        opacity: 0.95;
+      }
+      .cmdk-icon-svg {
+        width: 15px;
+        height: 15px;
+        display: block;
+      }
+      .cmdk-meta {
+        color: #9c9c9c;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .cmdk-separator {
+        height: 1px;
+        margin: 8px 4px;
+        background: rgba(255, 255, 255, 0.13);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <canvas id="ascii"></canvas>
+    </div>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item"><a class="breadcrumb-link" href="#">I</a></li>
+        <li class="breadcrumb-separator" role="presentation">&gt;</li>
+        <li class="breadcrumb-item"><a class="breadcrumb-link" href="#">am</a></li>
+        <li class="breadcrumb-separator" role="presentation">&gt;</li>
+        <li class="breadcrumb-item breadcrumb-page" aria-current="page">Francisco Terpolilli</li>
+      </ol>
+    </nav>
+
+    <div class="command-kbd" aria-hidden="true"><b>⌘/Ctrl</b> + <b>K</b></div>
+
+    <div class="cmdk-backdrop" id="cmdk-backdrop" role="dialog" aria-modal="true" aria-label="Command menu">
+      <div class="cmdk">
+        <input id="cmdk-search" class="cmdk-search" placeholder="Search commands or links..." autocomplete="off" />
+        <div id="cmdk-list" class="cmdk-list"></div>
+      </div>
+    </div>
+
+    <script type="module" src="./web_pinched_fingers.js?v=20"></script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+.env
+.venv/
+.DS_Store
+*.pyc
+__pycache__/
+pinched_fingers
+ghost_emoji
+.agents/
+skills-lock.json

@@ -45,11 +45,11 @@ let motionMode = "pinch";
 let loadVersion = 0;
 
 const workItems = [
-  { label: "White Circle", icon: "work-white-circle", mesh: "whitecircle_mesh.csv" },
-  { label: "Cursor Ambassador", icon: "work-cursor", mesh: "cursor_mesh_refined.csv" },
-  { label: "Cala AI 50", icon: "work-cala", mesh: "cala_mesh.csv" },
-  { label: "Specter", icon: "work-specter", mesh: "specter_mesh_refined.csv" },
-  { label: "bullfinch", icon: "work-bullfinch", mesh: "hand_mesh.csv" },
+  { label: "White Circle", icon: "work-white-circle", mesh: "whitecircle_mesh.csv", status: "Present" },
+  { label: "Cursor Ambassador", icon: "work-cursor", mesh: "cursor_mesh_refined.csv", status: "Present" },
+  { label: "Cala AI 50", icon: "work-cala", mesh: "cala_mesh.csv", status: "Present" },
+  { label: "Specter", icon: "work-specter", mesh: "specter_mesh_refined.csv", status: "Past" },
+  { label: "bullfinch", icon: "work-bullfinch", mesh: "bullfinch_mesh.csv", status: "Past" },
 ];
 
 const commandGroups = [
@@ -100,7 +100,7 @@ const commandGroups = [
     items: workItems.map((w) => ({
       label: w.label,
       icon: w.icon,
-      meta: w.mesh.replace("_mesh.csv", ""),
+      meta: w.status || "",
       action: () => {
         switchWorkModel(w).catch((err) => {
           statusMessage = `Render failed: ${err?.message || err}`;

@@ -40,6 +40,17 @@ let wristPivot = [0, 0, 0];
 let palmPivot = [0, 0, 0];
 let cmdkOpen = false;
 let cmdkActive = 0;
+let currentMeshPath = "hand_mesh.csv";
+let motionMode = "pinch";
+let loadVersion = 0;
+
+const workItems = [
+  { label: "White Circle", icon: "work-white-circle", mesh: "whitecircle_mesh.csv" },
+  { label: "Cursor Ambassador", icon: "work-cursor", mesh: "cursor_mesh_refined.csv" },
+  { label: "Cala AI 50", icon: "work-cala", mesh: "cala_mesh.csv" },
+  { label: "Specter", icon: "work-specter", mesh: "specter_mesh_refined.csv" },
+  { label: "bullfinch", icon: "work-bullfinch", mesh: "hand_mesh.csv" },
+];
 
 const commandGroups = [
   {
@@ -84,6 +95,20 @@ const commandGroups = [
       },
     ],
   },
+  {
+    name: "Work",
+    items: workItems.map((w) => ({
+      label: w.label,
+      icon: w.icon,
+      meta: w.mesh.replace("_mesh.csv", ""),
+      action: () => {
+        switchWorkModel(w).catch((err) => {
+          statusMessage = `Render failed: ${err?.message || err}`;
+          console.error(err);
+        });
+      },
+    })),
+  },
 ];
 
 function idx(x, y) {
@@ -121,6 +146,11 @@ function iconMarkup(icon) {
       <path fill="currentColor" d="M12 .5C5.65.5.5 5.65.5 12A11.5 11.5 0 0 0 8.36 22.94C8.93 23.05 9.14 22.69 9.14 22.38C9.14 22.1 9.13 21.17 9.12 20.18C5.95 20.87 5.28 18.65 5.28 18.65C4.76 17.32 4 16.97 4 16.97C2.95 16.25 4.08 16.27 4.08 16.27C5.25 16.35 5.86 17.47 5.86 17.47C6.9 19.25 8.59 18.73 9.24 18.43C9.35 17.68 9.65 17.17 9.98 16.88C7.45 16.59 4.8 15.62 4.8 11.3C4.8 10.07 5.24 9.07 5.97 8.29C5.85 8 5.47 6.82 6.08 5.22C6.08 5.22 7.05 4.91 9.12 6.31C10.04 6.05 11.03 5.92 12.02 5.92C13.01 5.92 14 6.05 14.93 6.31C17 4.9 17.97 5.22 17.97 5.22C18.58 6.82 18.2 8 18.08 8.29C18.82 9.07 19.25 10.07 19.25 11.3C19.25 15.64 16.59 16.58 14.05 16.87C14.47 17.23 14.84 17.94 14.84 19.03C14.84 20.6 14.82 21.86 14.82 22.38C14.82 22.7 15.03 23.06 15.61 22.94A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/>
     </svg>`;
   }
+  if (icon === "work-cursor") return `<img class="cmdk-icon-img" src="./gltf/CUBE_25D.svg" alt="" />`;
+  if (icon === "work-cala") return `<img class="cmdk-icon-img" src="./gltf/cala_ai_logo.jpeg" alt="" />`;
+  if (icon === "work-specter") return `<img class="cmdk-icon-img" src="./gltf/App Icon - White on Blue.svg" alt="" />`;
+  if (icon === "work-white-circle") return `<img class="cmdk-icon-img" src="./gltf/white_circle_logo.png" alt="" />`;
+  if (icon === "work-bullfinch") return `<span>◌</span>`;
   return icon ?? "•";
 }
 
@@ -182,8 +212,15 @@ function executeCommand(item) {
   if (!item) return;
   if (item.url) {
     setCmdkOpen(false);
-    const w = window.open(item.url, "_blank", "noopener,noreferrer");
-    if (!w) window.location.href = item.url;
+    const a = document.createElement("a");
+    a.href = item.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.referrerPolicy = "no-referrer";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
     return;
   }
   if (item.action) item.action();
@@ -288,11 +325,41 @@ function rotateAroundPivot(p, pivot, a, b, c) {
 }
 
 function applyMotionTransform(p) {
+  if (motionMode === "spin") {
+    return rotate(p);
+  }
   // 1) Pinch articulation around wrist.
   const gesture = rotateAroundPivot(p, wristPivot, A, 0.0, C);
   // 2) Vertical-axis yaw around palm center (natural showcase orbit).
   const yawed = rotateAroundPivot(gesture, palmPivot, 0.0, B, 0.0);
   return [yawed[0], yawed[1] + motionOffsetY, yawed[2]];
+}
+
+async function switchWorkModel(work) {
+  currentMeshPath = work.mesh;
+  motionMode = work.mesh === "hand_mesh.csv" ? "pinch" : "spin";
+  if (motionMode === "spin") {
+    if (work.mesh === "cursor_mesh_refined.csv") {
+      A = -0.18;
+      B = 0.2;
+      C = 0.0;
+    } else if (work.mesh === "specter_mesh_refined.csv") {
+      A = -0.08;
+      B = 0.0;
+      C = 0.0;
+    }
+    autoMotion = true;
+    motionOffsetY = 0;
+    if (work.mesh !== "cursor_mesh_refined.csv" && work.mesh !== "specter_mesh_refined.csv") {
+      A = -0.08;
+      B = 0.0;
+      C = 0.0;
+    }
+  }
+  statusMessage = `Loading ${work.mesh}...`;
+  await loadMesh(`./${work.mesh}`);
+  statusMessage = "";
+  setCmdkOpen(false);
 }
 
 function edgeFn(ax, ay, bx, by, px, py) {
@@ -468,31 +535,39 @@ function tick(ts) {
   lastTs = ts;
 
   if (autoMotion) {
-    // Phase-based motion time: pause/resume without jumping ahead.
-    motionTime += dt;
-    const t = motionTime;
-    // V2: pinch-hand gesture + smooth vertical-axis orbit (front/side/back views).
-    yawOrbit = t * 0.58;
-    const targetA = baseA + Math.sin(t * 2.25) * 0.23;
-    const targetB = baseB + yawOrbit + Math.sin(t * 2.25 + 0.45) * 0.08;
-    const targetC = baseC + Math.sin(t * 2.25 - 0.25) * 0.14;
-    const targetY = Math.sin(t * 2.25) * 0.52;
+    if (motionMode === "spin") {
+      B += dt * 0.72;
+      A += dt * 0.07;
+      C += dt * 0.05;
+    } else {
+      // Phase-based motion time: pause/resume without jumping ahead.
+      motionTime += dt;
+      const t = motionTime;
+      // V2: pinch-hand gesture + smooth vertical-axis orbit (front/side/back views).
+      yawOrbit = t * 0.58;
+      const targetA = baseA + Math.sin(t * 2.25) * 0.23;
+      const targetB = baseB + yawOrbit + Math.sin(t * 2.25 + 0.45) * 0.08;
+      const targetC = baseC + Math.sin(t * 2.25 - 0.25) * 0.14;
+      const targetY = Math.sin(t * 2.25) * 0.52;
 
-    // Smoothly blend from the user pose back into routine motion.
-    const blend = 1.0 - Math.exp(-dt * 4.2);
-    A += (targetA - A) * blend;
-    B += (targetB - B) * blend;
-    C += (targetC - C) * blend;
-    motionOffsetY += (targetY - motionOffsetY) * blend;
+      // Smoothly blend from the user pose back into routine motion.
+      const blend = 1.0 - Math.exp(-dt * 4.2);
+      A += (targetA - A) * blend;
+      B += (targetB - B) * blend;
+      C += (targetC - C) * blend;
+      motionOffsetY += (targetY - motionOffsetY) * blend;
+    }
   }
   render();
   requestAnimationFrame(tick);
 }
 
-async function loadMesh() {
-  const res = await fetch("./hand_mesh.csv");
+async function loadMesh(path = "./hand_mesh.csv") {
+  const version = ++loadVersion;
+  triangles = [];
+  const res = await fetch(path, { cache: "no-store" });
   if (!res.ok) {
-    throw new Error(`Failed to load hand_mesh.csv (${res.status})`);
+    throw new Error(`Failed to load ${path} (${res.status})`);
   }
   const txt = await res.text();
   const verts = [];
@@ -536,6 +611,8 @@ async function loadMesh() {
     minY + (maxY - minY) * 0.40,
     (minZ + maxZ) * 0.5,
   ];
+  if (version !== loadVersion) return;
+  history.fill(0);
 }
 
 window.addEventListener("keydown", (e) => {

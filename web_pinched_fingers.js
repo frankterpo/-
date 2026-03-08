@@ -45,11 +45,11 @@ let motionMode = "pinch";
 let loadVersion = 0;
 
 const workItems = [
-  { label: "White Circle", icon: "work-white-circle", mesh: "whitecircle_mesh.csv", status: "Present" },
-  { label: "Cursor Ambassador", icon: "work-cursor", mesh: "cursor_mesh_refined.csv", status: "Present" },
-  { label: "Cala AI 50", icon: "work-cala", mesh: "cala_mesh.csv", status: "Present" },
-  { label: "Specter", icon: "work-specter", mesh: "specter_mesh_refined.csv", status: "Past" },
-  { label: "bullfinch", icon: "work-bullfinch", mesh: "bullfinch_mesh.csv", status: "Past" },
+  { label: "White Circle", icon: "work-white-circle", mesh: "whitecircle_mesh.csv", status: "Present", page: "./work-white-circle.html" },
+  { label: "Cursor Ambassador", icon: "work-cursor", mesh: "cursor_mesh_refined.csv", status: "Present", page: "./work-cursor-ambassador.html" },
+  { label: "Cala AI 50", icon: "work-cala", mesh: "cala_mesh.csv", status: "Present", page: "./work-cala-ai-50.html" },
+  { label: "Specter", icon: "work-specter", mesh: "specter_mesh_refined.csv", status: "Past", page: "./work-specter.html" },
+  { label: "bullfinch", icon: "work-bullfinch", mesh: "bullfinch_mesh.csv", status: "Past", page: "./work-bullfinch.html" },
 ];
 
 const commandGroups = [
@@ -61,18 +61,21 @@ const commandGroups = [
         icon: "linkedin",
         meta: "francisco-t-334545144",
         url: "https://www.linkedin.com/in/francisco-t-334545144/",
+        newTab: true,
       },
       {
         label: "X",
         icon: "x",
         meta: "@frankterpo",
         url: "https://x.com/frankterpo",
+        newTab: true,
       },
       {
         label: "GitHub",
         icon: "github",
         meta: "frankterpo",
         url: "https://github.com/frankterpo",
+        newTab: true,
       },
     ],
   },
@@ -101,12 +104,8 @@ const commandGroups = [
       label: w.label,
       icon: w.icon,
       meta: w.status || "",
-      action: () => {
-        switchWorkModel(w).catch((err) => {
-          statusMessage = `Render failed: ${err?.message || err}`;
-          console.error(err);
-        });
-      },
+      url: w.page,
+      newTab: false,
     })),
   },
 ];
@@ -212,15 +211,19 @@ function executeCommand(item) {
   if (!item) return;
   if (item.url) {
     setCmdkOpen(false);
-    const a = document.createElement("a");
-    a.href = item.url;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    a.referrerPolicy = "no-referrer";
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    if (item.newTab) {
+      const a = document.createElement("a");
+      a.href = item.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.referrerPolicy = "no-referrer";
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } else {
+      window.location.assign(item.url);
+    }
     return;
   }
   if (item.action) item.action();
